@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/mnu_item_edit"
+        android:title="Редактировать" />
+    <item
+        android:id="@+id/mnu_item_done"
+        android:title="Сделано" />
+    <item
+        android:id="@+id/mnu_item_delete"
+        android:title="Удалить" />
+</menu>
