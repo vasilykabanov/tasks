@@ -4,21 +4,22 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.icu.util.Calendar;
 import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,10 +44,6 @@ import android.widget.Toast;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Random;
-
-import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -252,6 +249,31 @@ public class PlaceholderFragment extends Fragment {
                         RadioButton lowPriority = (RadioButton) rootView.findViewById(R.id.radioPriorityLow);
                         Switch notify = (Switch) rootView.findViewById(R.id.switchNotify);
 
+                        SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
+                        Date dt = new Date();
+                        try {
+                            dt = simpleDate.parse(date.getText().toString());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (title.getText().length() == 0) {
+                            showErrorToast("Введите название задачи!");
+                            return;
+                        }
+                        if (date.getText().length() == 0) {
+                            showErrorToast("Введите дату выполнения задачи!");
+                            return;
+                        }
+                        if (description.getText().length() == 0) {
+                            showErrorToast("Введите описание задачи!");
+                            return;
+                        }
+                        if (dt.getTime() < new Date().getTime()) {
+                            showErrorToast("Невозможно выбрать прошедшую дату!");
+                            return;
+                        }
+
                         Integer priority = 0;
                         if (highPriority.isChecked()) {
                             priority = 2;
@@ -268,14 +290,6 @@ public class PlaceholderFragment extends Fragment {
                         }
 
                         Toast.makeText(getContext(), "Saved", Toast.LENGTH_LONG).show();
-
-                        SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
-                        Date dt = new Date();
-                        try {
-                            dt = simpleDate.parse(date.getText().toString());
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
 
                         if (dt.getTime() - new Date().getTime() < 1000) {
                             scheduleNotification(rootView.getContext(), 5000, dataKeeper.get(dataKeeper.getData().size() - 1));
@@ -370,5 +384,26 @@ public class PlaceholderFragment extends Fragment {
                 break;
         }
         return rootView;
+    }
+
+    private void showErrorAlert(View view, String message) {
+        new AlertDialog.Builder(view.getContext())
+                .setTitle("Ошибка")
+                .setMessage(message)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void showErrorToast(String message) {
+        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        View view = toast.getView();
+        view.getBackground().setColorFilter(Color.parseColor("#ff2871"), PorterDuff.Mode.SRC_IN);
+        TextView text = view.findViewById(android.R.id.message);
+        text.setTextColor(Color.WHITE);
+        toast.show();
     }
 }
